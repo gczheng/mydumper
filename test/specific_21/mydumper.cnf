@@ -1,0 +1,9 @@
+#
+# Testing table with binary 16 column and without primary key and a view, with --default-character-set=utf8mb4
+#
+
+[mydumper]
+database=specific_21
+outputdir=/tmp/data
+#set-names=utf8mb4
+default-character-set=utf8mb4

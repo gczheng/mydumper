@@ -1,12 +1,12 @@
 [![CircleCI](https://circleci.com/gh/mydumper/mydumper/tree/master.svg?style=svg)](https://circleci.com/gh/mydumper/mydumper/tree/master)
- <span class="badge-geekswag">
-<a href="https://geekswag.co/collections/mydumper" title="Get Our Merch"><img src="https://img.shields.io/badge/Geekswag-Get%20Our%20Merch-brightgreen" alt="Get a Merch donate button" /></a>
 
- # What is MyDumper? 
-MyDumper is a Logical Backup Tool. It has 2 tools: 
-* mydumper which is responsible to export a consistent backup 
-* myloader reads the backup from mydumper, connects the to destination database and imports the backup.
-Both tools use multithreading capabilities
+ # What is MyDumper?
+MyDumper is a MySQL Logical Backup Tool. It has 2 tools:
+* `mydumper` which is responsible to export a consistent backup of MySQL databases
+* `myloader` reads the backup from mydumper, connects to the destination database and imports the backup.
+
+Both tools use multithreading capabilities.
+<br>MyDumper is Open Source and maintained by the community, it is not a Percona, MariaDB or MySQL product.
 
 # Why do we need MyDumper?
 * Parallelism (hence, speed) and performance (avoids expensive character set conversion routines, efficient code overall)
@@ -14,124 +14,29 @@ Both tools use multithreading capabilities
 * Consistency - maintains snapshot across all threads, provides accurate master and slave log positions, etc
 * Manageability - supports PCRE for specifying database and tables inclusions and exclusions
 
+# Documentation
+[Official Documentation](https://mydumper.github.io/mydumper/) (work in progress)
+[Machine JSON Logging](./README-machine-log.md)
+
 ## How to install mydumper/myloader?
 
-First get the correct url from the [releases section](https://github.com/maxbube/mydumper/releases) then:
+[This sections has been migrated](https://mydumper.github.io/mydumper/docs/html/installing.html) 
 
-### RedHat / Centos
+## Dependencies for building MyDumper
 
-```bash
-yum install https://github.com/mydumper/mydumper/releases/download/v0.11.3-2/mydumper-0.11.3-2.el7.x86_64.rpm
-yum install https://github.com/mydumper/mydumper/releases/download/v0.11.3-2/mydumper-0.11.3-2.el8.x86_64.rpm
-```
+[This sections has been migrated](https://mydumper.github.io/mydumper/docs/html/compiling.html) 
 
-### Ubuntu / Debian
-For ubuntu, you need to install the dependencies:
-```bash
-apt-get install libatomic1
+### Build Docker image
+You can download the [official docker image](https://hub.docker.com/r/mydumper/mydumper) or you can build the Docker image either from local sources or directly from Github sources with [the provided Dockerfile](./docker/Dockerfile).
+```shell
+docker build --build-arg CMAKE_ARGS='-DWITH_ZSTD=ON' -t mydumper \
+    https://github.com/mydumper/mydumper.git#master:docker
 ```
-Then you can download and install the package:
-```bash
-wget https://github.com/mydumper/mydumper/releases/download/v0.11.3-2/mydumper_0.11.3-2.$(lsb_release -cs)_amd64.deb
-dpkg -i mydumper_0.11.3-2.$(lsb_release -cs)_amd64.deb
-```
+Keep in mind that the main purpose the Dockerfile addresses is development and build from source locally. It might not be optimal for distribution purposes, but can also work as a quick build and run solution with the above one-liner, though.
 
-### FreeBSD
-By using pkg
+# How to use MyDumper
 
-```bash
-pkg install mydumper
-```
-or from ports
-
-```bash
-cd /usr/ports/databases/mydumper && make install
-```
-
-### OSX
-By using [Homebrew](https://brew.sh/)
-
-```bash
-brew install mydumper
-```
-
-## Dependencies for building mydumper
-
-### One needs to install development tools:
-* Ubuntu or Debian: 
-```
-apt-get install cmake g++ git
-```
-* Fedora, RedHat and CentOS:
-```
-yum install -y cmake gcc gcc-c++ git make
-```
-* MacOSX:
-
-```
-brew install cmake pkg-config sphinx-doc glib mysql-client openssl@1.1 pcre
-```
-
-```
-port install pkgconfig cmake
-```
-### One needs to install development versions of GLib, ZLib, PCRE and ZSTD:
-* Ubuntu or Debian: 
-```
-apt-get install libglib2.0-dev zlib1g-dev libpcre3-dev libssl-dev libzstd-dev
-```
-* Fedora, RedHat and CentOS: 
-```
-yum install -y glib2-devel mysql-devel openssl-devel pcre-devel zlib-devel libzstd-devel
-```
-* openSUSE: 
-```
-zypper install glib2-devel libmysqlclient-devel pcre-devel zlib-devel
-```
-* MacOSX: 
-```
-port install glib2 pcre 
-```
-### One needs to install MySQL/Percona/MariaDB development versions:
-* Ubuntu or Debian: 
-```
-apt-get install libmysqlclient-dev
-apt-get install libperconaserverclient20-dev
-apt-get install libmariadbclient-dev 
-```
-* Fedora, RedHat and CentOS: 
-```
-yum install -y mysql-devel
-yum install -y Percona-Server-devel-57
-yum install -y mariadb-devel
-```
-CentOS 7 comes by default with MariaDB 5.5 libraries which are very old.
-  It might be better to download a newer version of these libraries (MariaDB, MySQL, Percona etc).
-* openSUSE: 
-```
-zypper install libmysqlclient-devel
-```
-* MacOSX: port install mysql5
- (You may want to run 'port select mysql mysql5' afterwards)
-
-## How to build it?
-
-Run:
-
-```bash
-cmake .
-make
-```
-
-One has to make sure, that pkg-config, mysql_config, pcre-config are all in $PATH
-
-Binlog dump is disabled by default to compile with it you need to add -DWITH_BINLOG=ON to cmake options
-
-To build against mysql libs < 5.7 you need to disable SSL adding -DWITH_SSL=OFF
-
-# How to use mydumper
-
-See [Usage](docs/mydumper_usage.rst)
+See [Usage](https://mydumper.github.io/mydumper/docs/html/mydumper_usage.html)
 
 ## How does consistent snapshot work?
 
@@ -141,41 +46,99 @@ This is all done following best MySQL practices and traditions:
 * Global read lock is acquired ("FLUSH TABLES WITH READ LOCK")
 * Various metadata is read ("SHOW SLAVE STATUS","SHOW MASTER STATUS")
 * Other threads connect and establish snapshots ("START TRANSACTION WITH CONSISTENT SNAPSHOT")
-** On pre-4.1.8 it creates dummy InnoDB table, and reads from it.
+** On pre-4.1.8 it creates a dummy InnoDB table, and reads from it.
 * Once all worker threads announce the snapshot establishment, master executes "UNLOCK TABLES" and starts queueing jobs.
 
 This for now does not provide consistent snapshots for non-transactional engines - support for that is expected in 0.2 :)
 
 ## How to exclude (or include) databases?
 
-Once can use --regex functionality, for example not to dump mysql and test databases:
+[This sections has been migrated](https://mydumper.github.io/mydumper/docs/html/examples.html#regex) 
+
+## How to use --exec?
+
+You can execute external commands with --exec like this:
 
 ```bash
- mydumper --regex '^(?!(mysql\.|test\.))'
+ mydumper --exec "/usr/bin/gzip FILENAME"
 ```
 
-To dump only mysql and test databases:
+--exec is single threaded, similar implementation than Stream. The exec program must be an absolute path. FILENAME will be replaced by the filename that you want to be processed. You can set FILENAME in any place as an argument.
+
+## Defaults file
+
+The default file (aka: --defaults-file parameter) is starting to be more important in MyDumper
+- mydumper and myloader sections:
 
 ```bash
- mydumper --regex '^(mysql\.|test\.)'
+[mydumper]
+host = 127.0.0.1
+user = root
+password = p455w0rd
+database = db
+rows = 10000
+
+[myloader]
+host = 127.0.0.1
+user = root
+password = p455w0rd
+database = new_db
+optimize-keys = AFTER_IMPORT_PER_TABLE
 ```
 
-To not dump all databases starting with test:
+- Variables for mydumper and myloader executions:
 
+Prior to v0.14.0-1:
 ```bash
- mydumper --regex '^(?!(test))'
+[mydumper_variables]
+wait_timeout = 300
+sql_mode = ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+
+[myloader_variables]
+long_query_time = 300
+innodb_flush_log_at_trx_commit = 0
 ```
-
-To dump specify tables in different databases (Note: The name of tables should end with $. [related issue](https://github.com/maxbube/mydumper/issues/407)):
-
+From to v0.14.0-1:
 ```bash
- mydumper --regex '^(db1\.table1$|db2\.table2$)'
+[mydumper_session_variables]
+wait_timeout = 300
+sql_mode = ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+
+[mydumper_global_variables]
+sync_binlog = 0
+slow_query_log = OFF
+
+[myloader_session_variables]
+long_query_time = 300
+
+[myloader_global_variables]
+sync_binlog = 0
+innodb_flush_log_at_trx_commit = 0
 ```
 
-If you want to dump a couple of databases but discard some tables, you can do:
+- Per table sections:
 ```bash
- mydumper --regex '^(?=(?:(db1\.|db2\.)))(?!(?:(db1\.table1$|db2\.table2$)))'
-```
-Which will dump all the tables in db1 and db2 but it will exclude db1.table1 and db2.table2
+[`db`.`table`]
+where = column > 20
+limit = 10000
 
-Of course, regex functionality can be used to describe pretty much any list of tables.
+[`myd_test`.`t`]
+columns_on_select=qty,price+20
+columns_on_insert=qty,price
+```
+
+IMPORTANT: when using options that don't require an argument like: --no-data or --events, you need to set any value to those variables which will always indicate: TRUE/ON/ENABLE. It is a MISCONCEPTION if you think that adding `--no-data=0` will export data:
+```
+[mydumper]
+no-data=0
+```
+Will NOT export the data as no-data is being specified.
+
+
+# Misc
+
+## Versioning
+
+mydumper is versioned MAJOR.MINOR.PATCH-revision.
+
+Even patch versions indicate a pre-release. [More info](https://github.com/mydumper/mydumper/wiki/Versioning).

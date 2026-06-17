@@ -1,0 +1,8 @@
+#
+# Testing --hec-blob
+#
+
+[mydumper]
+tables-list=specific_5.actor
+outputdir=/tmp/data
+hex-blob

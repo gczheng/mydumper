@@ -15,36 +15,66 @@
 if(UNIX) 
     set(MYSQL_CONFIG_PREFER_PATH "$ENV{MYSQL_HOME}/bin" CACHE FILEPATH
         "preferred path to MySQL (mysql_config)")
-    find_program(MYSQL_CONFIG mysql_config
+    find_program(MARIADB_CONFIG mariadb_config
         ${MYSQL_CONFIG_PREFER_PATH}
+        /usr/local/mariadb/bin/
         /usr/local/mysql/bin/
         /usr/local/bin/
         /usr/bin/
         )
+
+    if(MARIADB_CONFIG)
+        message(STATUS "Found mariadb_config: ${MARIADB_CONFIG}")
+        set(MYSQL_CONFIG ${MARIADB_CONFIG})
+        execute_process(COMMAND ${MARIADB_CONFIG}
+            --tlsinfo
+            OUTPUT_VARIABLE MY_TMP)
+        string(STRIP ${MY_TMP} MY_TMP)
+        if (NOT ${MY_TMP} STREQUAL "")
+            set(MARIADB_SSL TRUE CACHE INTERNAL "libmariadb ssl")
+        else()
+            set(MARIADB_SSL FALSE CACHE INTERNAL "libmariadb ssl")
+        endif()
+        set(MARIADB_FOUND TRUE CACHE INTERNAL "libmariadb found")
+    else()
+        set(MARIADB_FOUND FALSE CACHE INTERNAL "libmariadb found")
+    endif()
+
+    if(NOT MYSQL_CONFIG)
+        find_program(MYSQL_CONFIG mysql_config
+            ${MYSQL_CONFIG_PREFER_PATH}
+            /usr/local/mysql/bin/
+            /usr/local/bin/
+            /usr/bin/
+            )
+    endif()
     
     if(MYSQL_CONFIG) 
         message(STATUS "Using mysql-config: ${MYSQL_CONFIG}")
         # set CFLAGS
-        exec_program(${MYSQL_CONFIG}
-            ARGS --cflags
+        execute_process(COMMAND ${MYSQL_CONFIG}
+            --cflags
             OUTPUT_VARIABLE MY_TMP)
 
+        string(REGEX REPLACE "\n$" "" MY_TMP "${MY_TMP}")
         set(MYSQL_CFLAGS ${MY_TMP} CACHE STRING INTERNAL)
 
         # set INCLUDE_DIR
-        exec_program(${MYSQL_CONFIG}
-            ARGS --include
+        execute_process(COMMAND ${MYSQL_CONFIG}
+            --include
             OUTPUT_VARIABLE MY_TMP)
 
+        string(REGEX REPLACE "\n$" "" MY_TMP "${MY_TMP}")
         string(REGEX REPLACE "-I([^ ]*)( .*)?" "\\1" MY_TMP "${MY_TMP}")
 
         set(MYSQL_ADD_INCLUDE_DIR ${MY_TMP} CACHE FILEPATH INTERNAL)
 
         # set LIBRARY_DIR
-        exec_program(${MYSQL_CONFIG}
-            ARGS --libs_r
+        execute_process(COMMAND ${MYSQL_CONFIG}
+            --libs_r
             OUTPUT_VARIABLE MY_TMP)
 
+        string(REGEX REPLACE "\n$" "" MY_TMP "${MY_TMP}")
         set(MYSQL_ADD_LIBRARIES "")
 
         # prepend space in order to match separate words only (e.g. rather
@@ -84,13 +114,13 @@ find_path(MYSQL_INCLUDE_DIR mysql.h
 )
 
 set(TMP_MYSQL_LIBRARIES "")
-set(CMAKE_FIND_LIBRARY_SUFFIXES .so .lib .so.1 .dylib .a)
+set(CMAKE_FIND_LIBRARY_SUFFIXES .so .lib .so.1 .dylib .a .tbd)
 foreach(MY_LIB ${MYSQL_ADD_LIBRARIES})
     find_library("MYSQL_LIBRARIES_${MY_LIB}" NAMES ${MY_LIB}
         HINTS
         ${MYSQL_ADD_LIBRARY_PATH}
         /usr/lib/mysql
-	/usr/lib
+        /usr/lib
         /usr/local/lib
         /usr/local/lib/mysql
         /usr/local/mysql/lib

@@ -1,0 +1,4 @@
+[myloader]
+threads=4
+no-schemas
+directory=/tmp/data

@@ -1,0 +1,8 @@
+#
+# Testing --tz-utc and TIME_ZONE output
+#
+
+[mydumper]
+tables-list=specific_5.actor
+outputdir=/tmp/data
+tz-utc

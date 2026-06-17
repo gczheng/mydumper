@@ -1,0 +1,117 @@
+name: All Docker Image Builder
+
+on:
+  workflow_dispatch
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+        
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image el7
+        uses: docker/build-push-action@v4
+        with:
+          context: docker/el7
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: mydumper/mydumper-builder-el7:latest
+          labels: mydumper/mydumper-builder-el7:latest
+
+      - name: Build and push Docker image el8
+        uses: docker/build-push-action@v4
+        with:
+          context: docker/el8
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: mydumper/mydumper-builder-el8:latest
+          labels: mydumper/mydumper-builder-el8:latest
+
+      - name: Build and push Docker image el9
+        uses: docker/build-push-action@v4
+        with:
+          context: docker/el9
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: mydumper/mydumper-builder-el9:latest
+          labels: mydumper/mydumper-builder-el9:latest
+
+      - name: Build and push Docker image el10
+        uses: docker/build-push-action@v4
+        with:
+          context: docker/el10
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: mydumper/mydumper-builder-el10:latest
+          labels: mydumper/mydumper-builder-el10:latest
+
+      - name: Build and push Docker image bionic
+        uses: docker/build-push-action@v4
+        with:
+          context: docker/bionic
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: mydumper/mydumper-builder-bionic:latest
+          labels: mydumper/mydumper-builder-bionic:latest
+
+      - name: Build and push Docker image bullseye
+        uses: docker/build-push-action@v4
+        with:
+          context: docker/bullseye
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: mydumper/mydumper-builder-bullseye:latest
+          labels: mydumper/mydumper-builder-bullseye:latest
+
+      - name: Build and push Docker image focal
+        uses: docker/build-push-action@v4
+        with:
+          context: docker/focal
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: mydumper/mydumper-builder-focal:latest
+          labels: mydumper/mydumper-builder-focal:latest
+
+      - name: Build and push Docker image jammy
+        uses: docker/build-push-action@v4
+        with:
+          context: docker/jammy
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: mydumper/mydumper-builder-jammy:latest
+          labels: mydumper/mydumper-builder-jammy:latest
+
+      - name: Build and push Docker image trixie
+        uses: docker/build-push-action@v4
+        with:
+          context: docker/trixie
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: mydumper/mydumper-builder-trixie:latest
+          labels: mydumper/mydumper-builder-trixie:latest
+
+      - name: Build and push Docker image noble
+        uses: docker/build-push-action@v4
+        with:
+          context: docker/noble
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: mydumper/mydumper-builder-noble:latest
+          labels: mydumper/mydumper-builder-noble:latest
+

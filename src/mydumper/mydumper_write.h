@@ -1,0 +1,42 @@
+/*
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+        Authors:    Domas Mituzas, Facebook ( domas at fb dot com )
+                    Mark Leith, Oracle Corporation (mark dot leith at oracle dot com)
+                    Andrew Hutchings, MariaDB Foundation (andrew at mariadb dot org)
+                    Max Bubenick, Percona RDBA (max dot bubenick at percona dot com)
+                    David Ducos, Percona (david dot ducos at percona dot com)
+*/
+#define LOAD_DATA_PREFIX "LOAD DATA LOCAL INFILE '" 
+
+#ifndef _src_mydumper_write_h
+#define _src_mydumper_write_h
+#include "mydumper_create_jobs.h"
+#endif
+
+void load_write_entries(GOptionGroup *main_group, GOptionContext *context);
+void initialize_write();
+void initialize_config_on_string(GString *output);
+void finalize_write();
+void write_table_job_into_file(struct table_job *tj);
+gboolean write_data(int file, GString *data);
+void close_table_job_files(struct table_job * tj);
+
+// Thread-local row batching: accumulates rows locally, flushes every 10K rows
+// update_dbt_rows_batched: Thread-local batching (call during processing)
+// flush_dbt_rows: Force flush thread-local count (call at end of table chunk)
+struct thread_data;
+struct db_table;
+void update_dbt_rows_batched(struct thread_data *td, struct db_table *dbt, guint64 num_rows);
+void flush_dbt_rows(struct thread_data *td);
